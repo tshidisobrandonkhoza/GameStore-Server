@@ -26,23 +26,74 @@ List<Game> games = new(){
 
 var builder = WebApplication.CreateBuilder(args);
 var app = builder.Build();
+
+
+
 //GET METHOD | Index
 app.MapGet("/", () => "Hello, we have succesfully reached the index, Happy!!");
 
-//GET METHOD | Games
-app.MapGet("/games", () => games);
 
-//GET METHOD | A single Game
-app.MapGet("/games/{id}", (int id) =>
+//grouping routes for | Games - 
+var group = app.MapGroup("/games").WithParameterValidation();
+//GET METHOD | Games
+group.MapGet("/", () => games);
+//GET METHOD | A single | Game
+group.MapGet("/{id}", (int id) =>
 {
    //declare a variable with a Game DataType
-   Game game = games.Find(game => game.Id == id);
+   Game? game = games.Find(game => game.Id == id);
 
    if (game is null)
    {
       return Results.NotFound();
    }
    return Results.Ok(game);
+}).WithName("singleGame");
+//POST METHOD | A single | Game
+group.MapPost("/", (Game game) =>
+{
+   game.Id = games.Max(game => game.Id) + 1;
+   games.Add(game);
+
+   //args 1 - name of the route to retrieve a Game 
+   //args 2 - define ID with an anonymouse object without an explicit class
+   //args 3 - object that waas created 
+   return Results.CreatedAtRoute("singleGame", new { id = game.Id }, game);
 });
 
+group.MapPut("/{id}", (int id, Game updatedGame) =>
+{
+
+   Game? existingGame = games.Find(game => game.Id == id);
+
+
+   if (existingGame is null)
+   {
+      updatedGame.Id = id;
+      games.Add(updatedGame);
+      return Results.CreatedAtRoute("singleGame", new { id = updatedGame.Id }, updatedGame);
+   }
+
+   existingGame.Name = updatedGame.Name;
+   existingGame.Genre = updatedGame.Genre;
+   existingGame.Price = updatedGame.Price;
+   existingGame.ReleasedDate = updatedGame.ReleasedDate;
+
+   return Results.NoContent();
+
+});
+
+group.MapDelete("/{id}", (int id) =>
+{
+   Game? game = games.Find(game => game.Id == id);
+
+   if (game is null)
+   {
+      return Results.NoContent();
+   }
+   games.Remove(game);
+
+   return Results.NoContent();
+
+});
 app.Run();
