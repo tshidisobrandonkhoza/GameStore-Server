@@ -1,4 +1,8 @@
+//configure services
 using GameStore.Server.Models;
+using Microsoft.Extensions.Options;
+
+
 
 //Just a list of games
 List<Game> games = new(){
@@ -24,17 +28,30 @@ List<Game> games = new(){
    };
 
 
+
 var builder = WebApplication.CreateBuilder(args);
+//using builder to configure services with CORS and allow it to accept options arg1
+builder.Services.AddCors(Options => Options.AddDefaultPolicy(builder =>
+{
+   //build the additional origin outside of the REST API origin
+   builder.WithOrigins("http://localhost:5198")
+   .AllowAnyHeader()
+   .AllowAnyMethod();
+})
+);
 var app = builder.Build();
 
-
+//allow the app to use the CORS SERVICES
+app.UseCors();
 
 //GET METHOD | Index
 app.MapGet("/", () => "Hello, we have succesfully reached the index, Happy!!");
 
 
 //grouping routes for | Games - 
-var group = app.MapGroup("/games").WithParameterValidation();
+
+// var group = app.MapGroup("/games").WithParameterValidation();
+var group = app.MapGroup("/games");
 //GET METHOD | Games
 group.MapGet("/", () => games);
 //GET METHOD | A single | Game
