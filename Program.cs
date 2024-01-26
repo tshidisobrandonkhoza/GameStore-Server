@@ -1,4 +1,5 @@
 //configure services
+using GameStore.Server.Data;
 using GameStore.Server.Models;
 using Microsoft.Extensions.Options;
 
@@ -42,6 +43,9 @@ builder.Services.AddCors(Options => Options.AddDefaultPolicy(builder =>
 
 //connecting to database string - appsettings ConnectionString
 var connString = builder.Configuration.GetConnectionString("GameStoreContext");
+
+//pass in the connection string
+builder.Services.AddSqlServer<GameStoreContext>(connString);
 
 var app = builder.Build();
 
