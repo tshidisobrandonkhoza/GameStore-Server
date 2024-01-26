@@ -39,6 +39,10 @@ builder.Services.AddCors(Options => Options.AddDefaultPolicy(builder =>
    .AllowAnyMethod();
 })
 );
+
+//connecting to database string - appsettings ConnectionString
+var connString = builder.Configuration.GetConnectionString("GameStoreContext");
+
 var app = builder.Build();
 
 //allow the app to use the CORS SERVICES
