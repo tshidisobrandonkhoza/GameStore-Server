@@ -39,13 +39,26 @@ app.MapGet("/", () => "Hello, we have succesfully reached the index, Happy!!");
 var group = app.MapGroup("/games");
 //GET METHOD | Games
 //Receive an instance of the gamestore context
-// Because Entity Frame work keeps track of the in and outs of data will use .AsTracking()
-group.MapGet("/", async (GameStoreContext context) => await context.Games.AsNoTracking().ToListAsync());
+
+
+group.MapGet("/", async (string? filter, GameStoreContext context) =>
+{
+
+   // Because Entity Frame work keeps track of the in and outs of data will use .AsTracking()
+   var games = context.Games.AsNoTracking();
+
+   if (filter is not null)
+   {
+      games = games.Where(game => game.Name.Contains(filter) || game.Genre.Contains(filter));
+   }
+   return await games.ToListAsync();
+});
+
+
 //GET METHOD | A single | Game
 group.MapGet("/{id}", async (int id, GameStoreContext context) =>
 {
    //declare a variable with a Game DataType
-   //  Game? game = games.Find(game => game.Id == id);
    Game? game = await context.Games.FindAsync(id);
    if (game is null)
    {
@@ -56,7 +69,6 @@ group.MapGet("/{id}", async (int id, GameStoreContext context) =>
 //POST METHOD | A single | Game
 group.MapPost("/", async (Game game, GameStoreContext context) =>
 {
-   //  game.Id = games.Max(game => game.Id) + 1;
    //games.Add(game);
    context.Games.Add(game);
    await context.SaveChangesAsync();
@@ -70,22 +82,10 @@ group.MapPost("/", async (Game game, GameStoreContext context) =>
 group.MapPut("/{id}", async (int id, Game updatedGame, GameStoreContext context) =>
 {
 
-   // Game? existingGame = games.Find(game => game.Id == id);
-   //updated
+
    Game? existingGame = await context.Games.FindAsync(id);
 
-   // if (existingGame is null)
-   // {
-   //    return Results.NotFound();
-   // }
 
-   // existingGame.Name = updatedGame.Name;
-   // existingGame.Genre = updatedGame.Genre;
-   // existingGame.Price = updatedGame.Price;
-   // existingGame.ReleasedDate = updatedGame.ReleasedDate;
-   // await context.SaveChangesAsync();
-
-   // return Results.NoContent();
    var rowsAffected = await context.Games.Where(game => game.Id == id)
    .ExecuteUpdateAsync(update => (
 
@@ -101,15 +101,6 @@ group.MapPut("/{id}", async (int id, Game updatedGame, GameStoreContext context)
 
 group.MapDelete("/{id}", async (int id, GameStoreContext context) =>
 {
-   // Game? game = games.Find(game => game.Id == id);
-
-   // if (game is null)
-   // {
-   //    return Results.NoContent();
-   // }
-   // games.Remove(game);
-
-   // return Results.NoContent();
 
    var rowsAffected = await context.Games.Where(game => game.Id == id)
    .ExecuteDeleteAsync();
