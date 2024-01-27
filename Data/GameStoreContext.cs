@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Threading.Tasks;
 using GameStore.Server.Models;
 using Microsoft.EntityFrameworkCore;
@@ -21,5 +22,14 @@ namespace GameStore.Server.Data
         //use to Query any data from SQL Sever database
         public DbSet<Game> Games => Set<Game>();
 
+        //Registering GameConfiguration Class to be compact with the migration Generated
+        //Overriding a method
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            // Applying any configurations defined accross the project
+            //Assembly.GetExecutingAssembly() will help us find every single configuration 
+            //and apply it as part of the migration
+            modelBuilder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
+        }
     }
 }

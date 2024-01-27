@@ -15,7 +15,7 @@ namespace GameStore.Server.Models
         [StringLength(20)]
         public String Genre { get; set; } = String.Empty;
        
-        [Range(1, 20)]
+        [Range(1,100)]
         public Decimal Price { get; set; }
         public DateTime ReleasedDate { get; set; }
     }
